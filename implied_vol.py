@@ -9,44 +9,127 @@ import matplotlib.pyplot as plt
 
 
 def d_one(price, strike, time, interest, volatility):
-    return (np.log(price / strike) + (interest  + 0.5 * np.power(volatility,2)) * time) / (volatility * np.sqrt(time))
+    '''
+    conditional probability function looking at moneyness of option
+
+    params
+    ======
+    price (float): current stock price of underlying
+    strike (float): strike price of option contract
+    time (datetime): time to expiry of contract, expressed in days
+    interest (float): implied interest rate over contract period
+    volatility (float): historical vol over contract period
+
+    returns
+    =======
+    model-implied conditional probability of option moneyness
+
+    '''
+    return (np.log(price / strike) + (interest  + 0.5 * np.power(volatility,2))\
+            * time) / (volatility * np.sqrt(time))
 
 
 def d_two(price, strike, time, interest, volatility):
-    return d_one(price, strike, time, interest, volatility) - (volatility * np.sqrt(time))
+    '''
+    probability of option expiring ITM
+
+    params
+    ======
+    price (float): current stock price of underlying
+    strike (float): strike price of option contract
+    time (datetime): time to expiry of contract, expressed in days
+    interest (float): implied interest rate over contract period
+    volatility (float): historical vol over contract period
+
+    returns
+    =======
+    model-implied probability of option being ITM
+
+    '''
+
+    return d_one(price, strike, time, interest, volatility) - (volatility * \
+            np.sqrt(time))
 
 
 def call_option(price, strike, time, interest, volatility) -> float:
     '''
     model a call option based on generalized BSM model
-    input price: current stock price of underlying
-    input strike: strike price of option contract
-    input time: time to expiry of contract, expressed in days
-    input interest: interest rate over period
-    input volatility: vol over time period
-    return: model-implied price of option
+
+    params
+    ======
+    price (float): current stock price of underlying
+    strike (float): strike price of option contract
+    time (datetime): time to expiry of contract, expressed in days
+    interest (float): implied interest rate over contract period
+    volatility (float): historical vol over contract period
+
+    returns
+    =======
+    model-implied price of option
     '''
 
-    d1 = (np.log(price / strike) + (interest + 0.5 * volatility ** 2) * time) / (volatility * np.sqrt(time))
-    d2 = (np.log(price / strike) + (interest - 0.5 * volatility ** 2) * time) / (volatility * np.sqrt(time))
+    d1 = d_one(price, strike, time, interest, volatility)
+    d2 = d_two(price, strike, time, interest, volatility)
 
-    call = (price * norm.cdf(d1, 0.0, 1.0) - strike * np.exp(-interest * time) * norm.cdf(d2, 0.0, 1.0))
+    call = (price * norm.cdf(d1, 0.0, 1.0) - strike * np.exp(-interest * time) \
+            * norm.cdf(d2, 0.0, 1.0))
+
     return call
 
 
+def vega(price, strike, time, interest, volatility):
+    '''
+    vega estimation function
 
-def implied_call_volatility(price, strike, time, interest, target, threshold= 0.0001):
-    high = 5
-    low = 0
-    while high-low  > threshold:
-        theoretical = call_option(price, strike, time, interest, (high+low)/2)
-        if theoretical > target:
-            high = (high+low) / 2
+    params
+    ======
+    price (float): current stock price of underlying
+    strike (float): strike price of option contract
+    time (datetime): time to expiry of contract, expressed in days
+    interest (float): implied interest rate over contract period
+    volatility (float): historical vol over contract period
 
-        else:
-            low = (high+low) / 2
+    returns
+    =======
+    estimated vega of option
+    '''
 
-    return (high + low) / 2
+
+    d1 = (np.log(S / K) + (r + sigma ** 2 / 2) * T) / sigma * np.sqrt(T)
+    return S  * np.sqrt(T) * norm.pdf(d1)
+
+def implied_call_volatility(option_price, price, strike, time, interest,
+                            volatility = 0.30, threshold = 0.0001,
+                            max_iter = 10000):
+    '''
+    estimation of implied volatility from observable market data
+
+    params
+    ======
+    option_price (float): current observable option price
+    price (float): current stock price of underlying
+    strike (float): strike price of option contract
+    time (datetime): time to expiry of contract, expressed in days
+    interest (float): implied interest rate over contract period
+    volatility (float): initial volatility estimate to work from
+    threshold (float): error threshold to break iteration on
+    max_iter (float): max number of iterations to allow before breaking
+
+    returns
+    =======
+    implied volatility of option given market data
+    '''
+
+    for i in range(max_iter):
+
+        err = call_option(price, strike, time,
+                         interest, volatility) - option_price
+
+        if abs(err) < threshold:
+            break
+        volatility = volatility - err / vega(price, strike, time, interest,
+                                             volatility)
+    return volatility
 
 
 
