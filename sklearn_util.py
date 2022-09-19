@@ -35,6 +35,19 @@ class DataFrameSelector(BaseEstimator, TransformerMixin):
         return X[self._attribute_names].values
 
 
+class VolCalculation(BaseEstimator, TransformerMixin):
+    def __init__(self, col_name, window=25):
+        self._col_name = col_name
+        self._window = window
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X:pd.DataFrame):
+        X[self._col_name + f'_{self._window}_day_std'] = \
+                                X[self._col_name].rolling(self._window).std()
+        return X
+
 class MeanVarScaler(BaseEstimator, TransformerMixin):
 
     def __init__(self):
