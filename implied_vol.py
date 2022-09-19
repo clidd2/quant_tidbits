@@ -93,10 +93,8 @@ def vega(price, strike, time, interest, volatility):
     =======
     estimated vega of option
     '''
-
-
-    d1 = (np.log(S / K) + (r + sigma ** 2 / 2) * T) / sigma * np.sqrt(T)
-    return S  * np.sqrt(T) * norm.pdf(d1)
+    d1 = d_one(price, strike, time, interest, volatility)
+    return strike * np.sqrt(time) * norm.pdf(d1)
 
 def implied_call_volatility(option_price, price, strike, time, interest,
                             volatility = 0.30, threshold = 0.0001,
@@ -139,13 +137,14 @@ def main():
     start_date = dt.date.today()
     end_date = dt.date(2022, 10, 7)
     time = (end_date - start_date).days / 365
-
-    price = 270.21
-    strike = 275
-    interest = 0.0024
-    target = 3.9
+    option_price = 12.30
+    price = 303.35
+    strike = 310.00
+    interest = 0.0350
     threshold = 0.00001
-    annual_vol = implied_call_volatility(price, strike, time, interest, target, threshold)
+
+    #implied_call_volatility(option_price, price, strike, time, interest, volatility = 0.30,
+    annual_vol = implied_call_volatility(option_price, price, strike, time, interest)
     daily_vol = annual_vol / np.sqrt(252)
     print(f'Annual Volatility: {annual_vol}')
     print(f'Daily Volatility: {daily_vol}')
