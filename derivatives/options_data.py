@@ -34,7 +34,7 @@ def get_expiries(dat):
 def get_all_data(dat):
     df = dat.get_all_data().reset_index()
     df['mid_price'] = (df['Bid'] + df['Ask']) / 2
-    df['time_to_exp'] = (df['Expiry'] - df['Quote_Time']).dt.days
+    df['time_to_exp'] = (df['Expiry'] - df['Quote_Time']).dt.days / 365
     df = df[df['mid_price'].isna()  == False]
     df = df[df['mid_price'] > 0]
     return df
@@ -73,8 +73,9 @@ def main():
     expiries = get_expiries(dat)
 
     df = get_all_data(dat)
-    call_df = call_iv(df, interest_rate, init_vol)
-    print(call_df)
+    print(df)
+    #call_df = call_iv(df, interest_rate, init_vol)
+    #print(call_df)
 
 
 if __name__ == '__main__':

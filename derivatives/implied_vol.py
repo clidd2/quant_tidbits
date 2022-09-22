@@ -23,6 +23,11 @@ def d_one(price, strike, time, interest, volatility):
     model-implied conditional probability of option moneyness
 
     '''
+    print(price)
+    print(strike)
+    print(interest)
+    print(volatility)
+    print(time)
     return (np.log(price / strike) + (interest  + 0.5 * np.power(volatility,2))\
             * time) / (volatility * np.sqrt(time))
 
@@ -92,7 +97,7 @@ def vega(price, strike, time, interest, volatility):
     estimated vega of option
     '''
     d1 = d_one(price, strike, time, interest, volatility)
-    return strike * np.sqrt(time) * norm.pdf(d1)
+    return price * np.sqrt(time) * norm.pdf(d1)
 
 def implied_call_volatility(option_price, price, strike, time, interest,
                             volatility = 0.30, threshold = 0.0001,
@@ -121,35 +126,32 @@ def implied_call_volatility(option_price, price, strike, time, interest,
     print(strike)
     print(time)
     print(interest)
-    print(volatility)
 
-    for i in range(max_iter):
 
+    for i in range(0, max_iter):
+        print(f'Init Vol: {volatility}')
         err = call_option(price, strike, time,
                          interest, volatility) - option_price
+        print(err)
 
-        if abs(err) < threshold:
-            break
-        volatility = volatility - err / vega(price, strike, time, interest,
+        if (abs(err) < threshold):
+            return volatility
+        volatility = volatility + err / vega(price, strike, time, interest,
                                              volatility)
 
     return volatility
 
 
-
-
 def main():
 
     start_date = dt.date.today()
-    end_date = dt.date(2022, 10, 7)
+    end_date = dt.date(2023, 1, 20)
     time = (end_date - start_date).days / 365
-    option_price = 12.30
-    price = 303.35
-    strike = 310.00
+    option_price = 276.87
+    price = 300.2996
+    strike = 3.33
     interest = 0.0350
     threshold = 0.00001
-
-    #implied_call_volatility(option_price, price, strike, time, interest, volatility = 0.30,
     annual_vol = implied_call_volatility(option_price, price, strike, time, interest)
     daily_vol = annual_vol / np.sqrt(252)
     print(f'Annual Volatility: {annual_vol}')
