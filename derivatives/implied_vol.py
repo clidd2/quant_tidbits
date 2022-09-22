@@ -6,8 +6,6 @@ import matplotlib.pyplot as plt
 
 
 
-
-
 def d_one(price, strike, time, interest, volatility):
     '''
     conditional probability function looking at moneyness of option
