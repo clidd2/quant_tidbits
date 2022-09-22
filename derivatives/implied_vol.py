@@ -116,6 +116,13 @@ def implied_call_volatility(option_price, price, strike, time, interest,
     implied volatility of option given market data
     '''
 
+    print(option_price)
+    print(price)
+    print(strike)
+    print(time)
+    print(interest)
+    print(volatility)
+
     for i in range(max_iter):
 
         err = call_option(price, strike, time,
@@ -125,6 +132,7 @@ def implied_call_volatility(option_price, price, strike, time, interest,
             break
         volatility = volatility - err / vega(price, strike, time, interest,
                                              volatility)
+
     return volatility
 
 
