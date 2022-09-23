@@ -23,13 +23,10 @@ def d_one(price, strike, time, interest, volatility):
     model-implied conditional probability of option moneyness
 
     '''
-    print(price)
-    print(strike)
-    print(interest)
-    print(volatility)
-    print(time)
-    return (np.log(price / strike) + (interest  + 0.5 * np.power(volatility,2))\
-            * time) / (volatility * np.sqrt(time))
+    d1 = (np.log(price/strike) + (interest + 0.5*volatility**2)*time) / \
+    (volatility*np.sqrt(time))
+
+    return d1
 
 
 def d_two(price, strike, time, interest, volatility):
@@ -50,8 +47,9 @@ def d_two(price, strike, time, interest, volatility):
 
     '''
 
-    return d_one(price, strike, time, interest, volatility) - (volatility * \
-            np.sqrt(time))
+    d_two = d_one(price, strike, time, interest, volatility) - volatility * \
+    np.sqrt(time)
+    return d_two
 
 
 def call_option(price, strike, time, interest, volatility) -> float:
@@ -97,11 +95,12 @@ def vega(price, strike, time, interest, volatility):
     estimated vega of option
     '''
     d1 = d_one(price, strike, time, interest, volatility)
+
     return price * np.sqrt(time) * norm.pdf(d1)
 
 def implied_call_volatility(option_price, price, strike, time, interest,
                             volatility = 0.30, threshold = 0.0001,
-                            max_iter = 10000):
+                            max_iter = 10000, verbose=False):
     '''
     estimation of implied volatility from observable market data
 
@@ -121,23 +120,34 @@ def implied_call_volatility(option_price, price, strike, time, interest,
     implied volatility of option given market data
     '''
 
-    print(option_price)
-    print(price)
-    print(strike)
-    print(time)
-    print(interest)
+    if verbose:
+        print('INITIAL PARAMETERS')
+        print('==================')
+        print(f'Option Price: {option_price}')
+        print(f'Price: {price}')
+        print(f'Strike: {strike}')
+        print(f'Time: {time}')
+        print(f'Interest Rate: {interest}')
+        print(f'Initial Volatility: {volatility}')
 
 
     for i in range(0, max_iter):
-        print(f'Init Vol: {volatility}')
-        err = call_option(price, strike, time,
-                         interest, volatility) - option_price
-        print(err)
+        try:
+            err = call_option(price, strike, time,
+                             interest, volatility) - option_price
 
-        if (abs(err) < threshold):
-            return volatility
-        volatility = volatility + err / vega(price, strike, time, interest,
-                                             volatility)
+            if (abs(err) < threshold):
+                return volatility
+
+            v = vega(price, strike, time, interest, volatility)
+            volatility = volatility - err / v
+
+
+
+        except Exception as err:
+            print(err)
+            volatility = -1
+            continue
 
     return volatility
 
@@ -145,14 +155,15 @@ def implied_call_volatility(option_price, price, strike, time, interest,
 def main():
 
     start_date = dt.date.today()
-    end_date = dt.date(2023, 1, 20)
-    time = (end_date - start_date).days / 365
-    option_price = 276.87
-    price = 300.2996
-    strike = 3.33
-    interest = 0.0350
+    end_date = dt.date(year=2022, month=10, day=21)
+    time = (end_date - start_date).days
+    option_price = 1.7
+    price = 276.45
+    strike = 348.33
+    interest = 0.025
     threshold = 0.00001
-    annual_vol = implied_call_volatility(option_price, price, strike, time, interest)
+    annual_vol = implied_call_volatility(option_price, price, strike, time, \
+                                        interest)
     daily_vol = annual_vol / np.sqrt(252)
     print(f'Annual Volatility: {annual_vol}')
     print(f'Daily Volatility: {daily_vol}')

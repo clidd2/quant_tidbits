@@ -73,7 +73,7 @@ def main():
     expiries = get_expiries(dat)
 
     df = get_all_data(dat)
-    print(df)
+    print(df[(df['Strike'] > 250) & (df['Strike'] < 350)])
     #call_df = call_iv(df, interest_rate, init_vol)
     #print(call_df)
 
