@@ -229,7 +229,7 @@ def main():
     start = end - dt.timedelta(365*5)
     col = 'Adj Close'
     dfs = concurrent_sp_data(tickers, start, end, 25)
-    opath = os.getcwd()
+    opath = r'/Users/christianliddiard/Programming/Python/data'
     export_price_data(dfs, opath)
 
 

@@ -103,7 +103,7 @@ class Brownian():
 
 
     def asset_performance(self, pricing_func=None, s0=None, vol=None, drift=1,
-                        time_period=52, time_slice=0.1, type='normal'):
+                        time_period=252, time_slice=1, type='normal'):
 
         '''
         Run stochastic browninan motion simulation on asset and return result
