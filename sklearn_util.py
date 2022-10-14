@@ -76,6 +76,11 @@ class MeanVarScaler(BaseEstimator, TransformerMixin):
 
 class CustomModelTrain:
 
+    '''
+    transforms a dataframe's numerical and categorical variables and generates a
+    custom fitting and training pipeline for input model
+    '''
+
     def __init__(self, df: pd.DataFrame,
                 X: list,
                 y: str,
@@ -85,6 +90,26 @@ class CustomModelTrain:
                 explicit_cat_cols=[],
                 model=None,
                 test_set=0.1):
+
+        '''
+        class constructor
+
+        params
+        ======
+        df (pd.DataFrame): pandas df containing all relevant data
+        X (list): list of columns to use as model features
+        y (str): column name of target variable
+        num_pipe (sklearn.pipeline.Pipeline): numeric data processor
+        cat_pipe (sklearn.pipeline.Pipeline): categorical data processor
+        explicit_num_cols (list): explicitly stated numerical columns to process
+        explicit_cat_cols (list): explicitly stated categorical columns to process
+        model (sklearn): sklearn model to train and return
+        test_set (float): testing set size in decimal form
+
+        returns
+        =======
+        no return value on a constructor
+        '''
 
         self._df = df
         self._params = x
@@ -99,8 +124,7 @@ class CustomModelTrain:
         self._final_model = self.full_pipeline()
 
 
-
-
+    #getters
     def get_df(self):
         return self._df
 
